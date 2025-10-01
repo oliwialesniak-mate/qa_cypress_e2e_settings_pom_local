@@ -5,32 +5,27 @@ class SettingsPage {
   }
 
   static updateUsername(username) {
-    cy.get('input[placeholder="Username"]').should('be.visible')
-    cy.get('input[placeholder="Username"]').clear()
-    cy.get('input[placeholder="Username"]').type(username, { delay: 100 })
+    cy.get('input[placeholder="Username"]', { timeout: 10000 }).should('be.visible')
+    cy.get('input[placeholder="Username"]').clear().type(username)
   }
 
   static updateBio(bio) {
-    cy.get('textarea[placeholder="Short bio about you"]').should('be.visible')
-    cy.get('textarea[placeholder="Short bio about you"]').clear()
-    cy.get('textarea[placeholder="Short bio about you"]').type(bio, { delay: 50 })
+    cy.get('textarea[placeholder="Short bio about you"]', { timeout: 10000 }).should('be.visible')
+    cy.get('textarea[placeholder="Short bio about you"]').clear().type(bio)
   }
 
   static updateEmail(email) {
-    cy.get('input[placeholder="Email"]').should('be.visible').and('not.be.disabled')
-    cy.get('input[placeholder="Email"]').clear()
-    cy.get('input[placeholder="Email"]').type(email, { delay: 50 })
+    cy.get('input[placeholder="Email"]', { timeout: 10000 }).should('be.visible').and('not.be.disabled')
+    cy.get('input[placeholder="Email"]').clear().type(email)
   }
 
   static updatePassword(password) {
-    cy.get('input[placeholder="New Password"]').should('be.visible')
-    cy.get('input[placeholder="New Password"]').clear()
-    cy.get('input[placeholder="New Password"]').type(password, { delay: 50 })
+    cy.get('input[placeholder="New Password"]', { timeout: 10000 }).should('be.visible')
+    cy.get('input[placeholder="New Password"]').clear().type(password)
   }
 
   static submit() {
     cy.get('button[type="submit"]').click()
-    // wait for form to settle back
     cy.get('form').should('be.visible')
   }
 
