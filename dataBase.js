@@ -1,26 +1,26 @@
-const { Sequelize } = require('sequelize');
+// cypress/support/dataBase.js
+const { sequelize } = require('../../api/models') // adjust path if needed
 
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: './db.sqlite3',
-  logging: false,
-});
-
+// Clears all tables, respecting foreign keys
 async function clear() {
   try {
-    await sequelize.query('DELETE FROM User;');
-    await sequelize.query('DELETE FROM Article;');
-    await sequelize.query('DELETE FROM Comment;');
-    await sequelize.query('DELETE FROM Tag;');
-    await sequelize.query('DELETE FROM ArticleTag;');
-    await sequelize.query('DELETE FROM UserFollowUser;');
-    await sequelize.query('DELETE FROM UserFavoriteArticle;');
-
-    console.log('✅ DB was cleared');
-  } catch (error) {
-    console.error("❌ Can't clear DB", error);
-    throw error;
+    await sequelize.truncate({ cascade: true })
+    return null
+  } catch (err) {
+    console.error('❌ DB clear failed:', err)
+    throw err
   }
 }
 
-module.exports = { clear };
+// Fully resets schema
+async function reset() {
+  try {
+    await sequelize.sync({ force: true }) // drop + recreate tables
+    return null
+  } catch (err) {
+    console.error('❌ DB reset failed:', err)
+    throw err
+  }
+}
+
+module.exports = { clear, reset }
