@@ -12,22 +12,16 @@ describe('Settings page', () => {
     cy.get('form').should('be.visible')
   })
 
-  it('should provide an ability to update username', () => {
-    const newUsername = faker.internet.userName().slice(0, 20) // keep name length reasonable
+ it('should update username', () => {
+  const newUsername = faker.internet.userName()
 
-    // Use page object to fill and then submit
-    SettingsPage.fillUsername(newUsername)
-    SettingsPage.submit()
+  cy.intercept('PUT', '/api/user').as('updateUser') // ✅ before
 
-    // Assert via UI that the username field has new value
-    SettingsPage.getUsernameField().should('have.value', newUsername)
+  SettingsPage.updateUsername(newUsername).submit()
 
-    // Optionally assert backend persisted by intercepting request
-    cy.intercept('PUT', '/api/user').as('updateUser')
-    // submit again to ensure request captured in CI if needed
-    SettingsPage.submit()
-    cy.wait('@updateUser').its('response.statusCode').should('eq', 200)
-  })
+  cy.wait('@updateUser').its('response.statusCode').should('eq', 200)
+  cy.contains(newUsername).should('be.visible')
+})
 
   it('should provide an ability to update bio', () => {
     const newBio = faker.lorem.sentence()

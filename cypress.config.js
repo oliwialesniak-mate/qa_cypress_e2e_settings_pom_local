@@ -8,6 +8,21 @@ module.exports = defineConfig({
     video: true,
     screenshotOnRunFailure: true,
 
+    const { defineConfig } = require('cypress')
+const { clear, reset } = require('./dataBase')
+
+module.exports = defineConfig({
+  e2e: {
+    setupNodeEvents(on) {
+      on('task', {
+        'db:clear': () => clear(),
+        'db:reset': () => reset(),
+      })
+    },
+    baseUrl: 'http://localhost:3000',
+  },
+})
+
     setupNodeEvents(on, config) {
       on('task', {
         async 'db:clear'() {

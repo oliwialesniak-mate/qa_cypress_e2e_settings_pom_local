@@ -1,8 +1,7 @@
 // dataBase.js
-const { sequelize } = require('./api/models') // adjust path if needed
-
 async function clear() {
   try {
+    const { sequelize } = require('./api/models') // ✅ require inside
     await sequelize.truncate({ cascade: true })
     return null
   } catch (err) {
@@ -13,6 +12,7 @@ async function clear() {
 
 async function reset() {
   try {
+    const { sequelize } = require('./api/models')
     await sequelize.sync({ force: true })
     return null
   } catch (err) {
