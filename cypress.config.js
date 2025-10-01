@@ -22,9 +22,14 @@ module.exports = defineConfig({
             description: faker.lorem.words(),
             body: faker.lorem.words(),
             tag: faker.lorem.word()
-          };;
+          };
         },
+        // 👇 add both
         'db:clear'() {
+          clear();
+          return null;
+        },
+        'db:reset'() {
           clear();
           return null;
         },
