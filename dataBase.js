@@ -1,24 +1,22 @@
-// cypress/support/dataBase.js
-const { sequelize } = require('../../api/models') // adjust path if needed
+// dataBase.js
+const { sequelize } = require('./api/models') // adjust path if needed
 
-// Clears all tables, respecting foreign keys
 async function clear() {
   try {
     await sequelize.truncate({ cascade: true })
     return null
   } catch (err) {
-    console.error('❌ DB clear failed:', err)
+    console.error('❌ Clear failed:', err)
     throw err
   }
 }
 
-// Fully resets schema
 async function reset() {
   try {
-    await sequelize.sync({ force: true }) // drop + recreate tables
+    await sequelize.sync({ force: true })
     return null
   } catch (err) {
-    console.error('❌ DB reset failed:', err)
+    console.error('❌ Reset failed:', err)
     throw err
   }
 }

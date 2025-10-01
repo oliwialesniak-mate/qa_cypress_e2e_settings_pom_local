@@ -1,6 +1,6 @@
 // cypress.config.js
 const { defineConfig } = require('cypress')
-const { clear, reset } = require('./cypress/support/dataBase')
+const { clear } = require('./dataBase') // ✅ root-level dataBase.js
 
 module.exports = defineConfig({
   e2e: {
@@ -11,11 +11,12 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       on('task', {
         async 'db:clear'() {
-          // Always return the Promise so Cypress waits
-          return clear()
-        },
-        async 'db:reset'() {
-          return reset()
+          try {
+            return await clear() // ✅ return Promise so Cypress waits
+          } catch (err) {
+            console.error('❌ DB clear failed:', err)
+            throw err
+          }
         },
       })
 
