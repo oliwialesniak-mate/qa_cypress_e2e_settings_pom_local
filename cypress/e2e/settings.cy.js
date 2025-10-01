@@ -1,64 +1,80 @@
 /// <reference types="cypress" />
-
+import { faker } from '@faker-js/faker'
 import SettingsPage from '../support/pages/SettingsPage'
 
 describe('Settings page', () => {
   beforeEach(() => {
-    cy.task('clearDb') // ✅ ensure DB is reset
-    cy.registerAndLogin()
-    cy.visit('/settings')
+    // clear DB and sign in
+    cy.task('db:clear')
+    cy.registerAndLogin() // uses commands.js implementation below
+    SettingsPage.visit()
     cy.url().should('include', '/settings')
     cy.get('form').should('be.visible')
   })
 
   it('should provide an ability to update username', () => {
-    const newUsername = 'user_' + Date.now()
-    cy.get('form input[type="text"]').first().as('usernameField')
+    const newUsername = faker.internet.userName().slice(0, 20) // keep name length reasonable
 
-    cy.get('@usernameField').clear().type(newUsername)
+    // Use page object to fill and then submit
+    SettingsPage.fillUsername(newUsername)
     SettingsPage.submit()
 
-    cy.get('@usernameField').should('have.value', newUsername)
+    // Assert via UI that the username field has new value
+    SettingsPage.getUsernameField().should('have.value', newUsername)
+
+    // Optionally assert backend persisted by intercepting request
+    cy.intercept('PUT', '/api/user').as('updateUser')
+    // submit again to ensure request captured in CI if needed
+    SettingsPage.submit()
+    cy.wait('@updateUser').its('response.statusCode').should('eq', 200)
   })
 
   it('should provide an ability to update bio', () => {
-    const newBio = 'This is my new bio'
+    const newBio = faker.lorem.sentence()
 
-    cy.get('form textarea').first().as('bioField')
-    cy.get('@bioField').clear().type(newBio)
-
+    SettingsPage.fillBio(newBio)
     SettingsPage.submit()
 
-    cy.get('@bioField').should('have.value', newBio)
+    // Assert UI change
+    SettingsPage.getBioField().should('have.value', newBio)
+
+    // Also check API persisted
+    cy.intercept('PUT', '/api/user').as('updateUserBio')
+    SettingsPage.submit()
+    cy.wait('@updateUserBio').its('response.statusCode').should('eq', 200)
   })
 
   it('should provide an ability to update an email', () => {
     const newEmail = `test_${Date.now()}@mail.com`
 
-    cy.get('form input[type="email"]').as('emailField')
-    cy.get('@emailField').should('not.be.disabled')
-    cy.get('@emailField').clear().type(newEmail)
-
+    SettingsPage.getEmailField().should('not.be.disabled')
+    SettingsPage.fillEmail(newEmail)
     SettingsPage.submit()
 
-    cy.get('@emailField').should('have.value', newEmail)
+    SettingsPage.getEmailField().should('have.value', newEmail)
+    cy.intercept('PUT', '/api/user').as('updateUserEmail')
+    SettingsPage.submit()
+    cy.wait('@updateUserEmail').its('response.statusCode').should('eq', 200)
   })
 
   it('should provide an ability to update password', () => {
-    const newPassword = 'NewPass123!'
+    const newPassword = 'NewP@ssw0rd!' + faker.internet.password(6)
 
-    cy.get('form input[type="password"]').as('passwordField')
-    cy.get('@passwordField').clear().type(newPassword)
+    SettingsPage.fillPassword(newPassword)
 
+    // Intercept the API request and assert it was made & successful.
+    cy.intercept('PUT', '/api/user').as('updatePassword')
     SettingsPage.submit()
-
-    // no visible change possible, but check request was sent
-    cy.intercept('PUT', '/api/user').as('updateUser')
-    cy.wait('@updateUser').its('response.statusCode').should('eq', 200)
+    cy.wait('@updatePassword').its('response.statusCode').should('eq', 200)
   })
 
   it('should provide an ability to log out', () => {
+    // Use Page Object logout that clicks the logout link/button
     SettingsPage.logout()
-    cy.url().should('include', '/login')
+    // App either navigates to /login or root. Accept either.
+    cy.url().should('match', /\/(login|$)/)
+    // localStorage and cookie should be cleared by command
+    cy.window().its('localStorage.user').should('not.exist')
+    cy.getCookie('auth').should('not.exist')
   })
 })

@@ -1,37 +1,62 @@
+// cypress/support/pages/SettingsPage.js
 class SettingsPage {
-  static visit() {
+  visit() {
     cy.visit('/settings')
-    cy.get('form').should('be.visible')
+    // wait for the form to appear
+    cy.get('[data-cy="settings-form"]').should('be.visible')
   }
 
-  static updateUsername(username) {
-    cy.get('input[placeholder="Username"]', { timeout: 10000 }).should('be.visible')
-    cy.get('input[placeholder="Username"]').clear().type(username)
+  // getters
+  getUsernameField() {
+    return cy.getByDataCy('settings-username')
   }
 
-  static updateBio(bio) {
-    cy.get('textarea[placeholder="Short bio about you"]', { timeout: 10000 }).should('be.visible')
-    cy.get('textarea[placeholder="Short bio about you"]').clear().type(bio)
+  getBioField() {
+    return cy.getByDataCy('settings-bio')
   }
 
-  static updateEmail(email) {
-    cy.get('input[placeholder="Email"]', { timeout: 10000 }).should('be.visible').and('not.be.disabled')
-    cy.get('input[placeholder="Email"]').clear().type(email)
+  getEmailField() {
+    return cy.getByDataCy('settings-email')
   }
 
-  static updatePassword(password) {
-    cy.get('input[placeholder="New Password"]', { timeout: 10000 }).should('be.visible')
-    cy.get('input[placeholder="New Password"]').clear().type(password)
+  getPasswordField() {
+    return cy.getByDataCy('settings-password')
   }
 
-  static submit() {
-    cy.get('button[type="submit"]').click()
-    cy.get('form').should('be.visible')
+  getSubmitButton() {
+    return cy.getByDataCy('settings-submit')
   }
 
-  static logout() {
-    cy.contains('Or click here to logout').click()
+  getLogoutButton() {
+    return cy.getByDataCy('settings-logout')
+  }
+
+  // actions (fillers)
+  fillUsername(value) {
+    this.getUsernameField().clear().type(value)
+  }
+
+  fillBio(value) {
+    this.getBioField().clear().type(value)
+  }
+
+  fillEmail(value) {
+    this.getEmailField().clear().type(value)
+  }
+
+  fillPassword(value) {
+    this.getPasswordField().clear().type(value, { log: false })
+  }
+
+  submit() {
+    // break chains: alias the button, click separately
+    this.getSubmitButton().as('submitBtn')
+    cy.get('@submitBtn').click()
+  }
+
+  logout() {
+    this.getLogoutButton().click()
   }
 }
 
-export default SettingsPage
+export default new SettingsPage()

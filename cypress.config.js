@@ -1,39 +1,25 @@
-import { defineConfig } from 'cypress';
-import { faker } from '@faker-js/faker';
-import { clear } from './dataBase';
+// cypress.config.js
+const { defineConfig } = require('cypress')
+const { clearDb, resetDb } = require('./cypress/support/dataBase')
 
 module.exports = defineConfig({
   e2e: {
     baseUrl: 'http://localhost:3000',
+    video: true,
+    screenshotOnRunFailure: true,
+
     setupNodeEvents(on, config) {
       on('task', {
-        generateUser() {
-          let randomNumber = Math.ceil(Math.random(1000) * 1000);
-          let userName = faker.name.firstName() + `${randomNumber}`;
-          return {
-            username: userName.toLowerCase(),
-            email: 'test'+`${randomNumber}`+'@mail.com',
-            password: '12345Qwert!',
-          };
+        async 'db:clear'() {
+          // Return the Promise so Cypress waits
+          return clearDb()
         },
-        generateArticle() {
-          return {
-            title: faker.lorem.word(),
-            description: faker.lorem.words(),
-            body: faker.lorem.words(),
-            tag: faker.lorem.word()
-          };
+        async 'db:reset'() {
+          return resetDb()
         },
-        // 👇 add both
-        'db:clear'() {
-          clear();
-          return null;
-        },
-        'db:reset'() {
-          clear();
-          return null;
-        },
-      });
+      })
+
+      return config
     },
   },
-});
+})
